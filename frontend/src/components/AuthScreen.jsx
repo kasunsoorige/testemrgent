@@ -4,24 +4,60 @@ import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
+import { useAuth } from '../contexts/AuthContext';
+import { toast } from '../hooks/use-toast';
 
-const AuthScreen = ({ onAuth }) => {
+const AuthScreen = () => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [isSignUp, setIsSignUp] = useState(false);
   const [authMethod, setAuthMethod] = useState('phone');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const { login, register } = useAuth();
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Mock authentication - in real app, this would call backend API
-    onAuth({
-      name: name || 'User',
-      phone: phoneNumber,
-      email: email,
-      method: authMethod
-    });
+    setIsLoading(true);
+
+    try {
+      if (isSignUp) {
+        // Registration
+        const userData = {
+          name,
+          password,
+          ...(authMethod === 'phone' ? { phone: phoneNumber } : { email }),
+        };
+        
+        await register(userData);
+        toast({
+          title: "Success!",
+          description: "Account created successfully. Welcome to PayPhone!",
+        });
+      } else {
+        // Login
+        const credentials = {
+          password,
+          ...(authMethod === 'phone' ? { phone: phoneNumber } : { email }),
+        };
+        
+        await login(credentials);
+        toast({
+          title: "Welcome back!",
+          description: "You've successfully logged in to PayPhone.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Authentication failed. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -120,10 +156,20 @@ const AuthScreen = ({ onAuth }) => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-medium transition-colors"
+                  disabled={isLoading}
+                  className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  Sign In
-                  <ArrowRight size={18} className="ml-2" />
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Signing In...
+                    </span>
+                  ) : (
+                    <>
+                      Sign In
+                      <ArrowRight size={18} className="ml-2" />
+                    </>
+                  )}
                 </Button>
               </form>
             </TabsContent>
@@ -197,10 +243,20 @@ const AuthScreen = ({ onAuth }) => {
 
                 <Button
                   type="submit"
-                  className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-medium transition-colors"
+                  disabled={isLoading}
+                  className="w-full bg-pink-500 hover:bg-pink-600 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  Create Account
-                  <ArrowRight size={18} className="ml-2" />
+                  {isLoading ? (
+                    <span className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Creating Account...
+                    </span>
+                  ) : (
+                    <>
+                      Create Account
+                      <ArrowRight size={18} className="ml-2" />
+                    </>
+                  )}
                 </Button>
               </form>
             </TabsContent>
