@@ -10,16 +10,12 @@ from typing import List
 import uuid
 from datetime import datetime
 
-# Import route modules
-from routes import auth, chats, messages, users
-
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
+# Import route modules after env is loaded
+from routes import auth, chats, messages, users
+from database import db
 
 # Create the main app without a prefix
 app = FastAPI(title="PayPhone API", version="1.0.0")
