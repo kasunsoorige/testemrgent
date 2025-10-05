@@ -3,16 +3,10 @@ from typing import List, Optional
 from models.message import MessageCreate, Message, MessageResponse, MessageStatusUpdate
 from models.chat import LastMessage
 from auth.auth_handler import auth_handler
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
+from database import db
 from datetime import datetime
 
 router = APIRouter(prefix="/chats", tags=["messages"])
-
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
 
 @router.get("/{chat_id}/messages", response_model=List[MessageResponse])
 async def get_chat_messages(
