@@ -18,6 +18,9 @@ security = HTTPBearer()
 class AuthHandler:
     def hash_password(self, password: str) -> str:
         """Hash password using bcrypt"""
+        # Bcrypt has a 72-byte limit, so truncate if necessary
+        if len(password.encode('utf-8')) > 72:
+            password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
         return pwd_context.hash(password)
     
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
