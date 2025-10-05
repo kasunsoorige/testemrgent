@@ -2,16 +2,10 @@ from fastapi import APIRouter, HTTPException, status, Depends, Query
 from typing import List, Optional
 from models.user import UserResponse
 from auth.auth_handler import auth_handler
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
+from database import db
 from datetime import datetime
 
 router = APIRouter(prefix="/users", tags=["users"])
-
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
 
 @router.get("/", response_model=List[UserResponse])
 async def get_all_users(
