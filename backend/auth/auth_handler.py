@@ -31,11 +31,13 @@ class AuthHandler:
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify password against hash"""
         # Apply same pre-hashing as in hash_password
-        if len(plain_password.encode('utf-8')) > 72:
-            # Pre-hash with SHA256 and base64 encode
-            password_hash = hashlib.sha256(plain_password.encode('utf-8')).digest()
-            plain_password = base64.b64encode(password_hash).decode('ascii')
-        return pwd_context.verify(plain_password, hashed_password)
+        password_bytes = plain_password.encode('utf-8')
+        if len(password_bytes) > 72:
+            # Pre-hash with SHA256
+            password_bytes = hashlib.sha256(password_bytes).digest()
+        
+        # Verify password
+        return bcrypt.checkpw(password_bytes, hashed_password.encode('utf-8'))
     
     def encode_token(self, user_id: str) -> str:
         """Create JWT token"""
