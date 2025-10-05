@@ -25,6 +25,9 @@ class AuthHandler:
     
     def verify_password(self, plain_password: str, hashed_password: str) -> bool:
         """Verify password against hash"""
+        # Apply same truncation as in hash_password
+        if len(plain_password.encode('utf-8')) > 72:
+            plain_password = plain_password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
         return pwd_context.verify(plain_password, hashed_password)
     
     def encode_token(self, user_id: str) -> str:
