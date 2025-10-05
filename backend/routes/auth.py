@@ -1,16 +1,10 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from models.user import UserCreate, UserLogin, User, UserResponse, UserUpdate
 from auth.auth_handler import auth_handler
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
+from database import db
 from datetime import datetime
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
-
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
 
 @router.post("/register", response_model=dict)
 async def register_user(user_data: UserCreate):
