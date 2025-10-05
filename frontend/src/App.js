@@ -1,54 +1,100 @@
-import { useEffect } from "react";
-import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
+import React, { useState } from "react";
+import "./App.css";
+import { BrowserRouter } from "react-router-dom";
+import AuthScreen from "./components/AuthScreen";
+import ChatList from "./components/ChatList";
+import ChatWindow from "./components/ChatWindow";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const App = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
 
-  useEffect(() => {
-    helloWorldApi();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+  const handleAuth = (userData) => {
+    setCurrentUser(userData);
+    setIsAuthenticated(true);
+  };
 
-function App() {
+  const handleChatSelect = (chat) => {
+    setSelectedChat(chat);
+  };
+
+  const handleBackToChats = () => {
+    setSelectedChat(null);
+  };
+
+  if (!isAuthenticated) {
+    return <AuthScreen onAuth={handleAuth} />;
+  }
+
   return (
     <div className="App">
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
+        <div className="h-screen bg-gray-100">
+          {isMobile ? (
+            // Mobile Layout
+            <div className="h-full">
+              {selectedChat ? (
+                <ChatWindow 
+                  chat={selectedChat} 
+                  onBack={handleBackToChats}
+                />
+              ) : (
+                <ChatList 
+                  onChatSelect={handleChatSelect}
+                  selectedChatId={selectedChat?.id}
+                />
+              )}
+            </div>
+          ) : (
+            // Desktop Layout
+            <div className="flex h-full">
+              <div className="w-1/3 min-w-[320px] max-w-md border-r border-gray-300">
+                <ChatList 
+                  onChatSelect={handleChatSelect}
+                  selectedChatId={selectedChat?.id}
+                />
+              </div>
+              <div className="flex-1">
+                {selectedChat ? (
+                  <ChatWindow 
+                    chat={selectedChat} 
+                    onBack={handleBackToChats}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-gray-50">
+                    <div className="text-center">
+                      <div className="mb-4">
+                        <div className="mx-auto w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: '#E90062' }}>
+                          <span className="text-2xl text-white">💬</span>
+                        </div>
+                      </div>
+                      <h2 className="text-xl font-semibold text-gray-700 mb-2">
+                        Welcome to PayPhone
+                      </h2>
+                      <p className="text-gray-500">
+                        Select a chat to start messaging
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
       </BrowserRouter>
     </div>
   );
-}
+};
 
 export default App;
