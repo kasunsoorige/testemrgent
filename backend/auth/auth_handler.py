@@ -1,14 +1,11 @@
 import jwt
 from datetime import datetime, timedelta
-from passlib.context import CryptContext
+import bcrypt
 from fastapi import HTTPException, status, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import os
 import hashlib
 import base64
-
-# Password hashing
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # JWT Configuration  
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY", "payphone-secret-key-change-in-production")
